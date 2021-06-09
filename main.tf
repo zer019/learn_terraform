@@ -155,6 +155,8 @@ resource "aws_instance" "webserver" {
   instance_type          = "t2.micro"
   security_groups = [aws_security_group.webserverSecurity.id]
   subnet_id = aws_subnet.webservers.id
+  key_name = "N. Virginia"
+  user_data_base64 = "IwAhAC8AYgBpAG4ALwBiAGEAcwBoAAoAcwB1AGQAbwAgAHMAdQAKAHkAdQBtACAALQB5ACAAaQBuAHMAdABhAGwAbAAgAGgAdAB0AHAAZAAKAGUAYwBoAG8AIAAiADwAcAA+ACAATQB5ACAASQBuAHMAdABhAG4AYwBlACEAIAA8AC8AcAA+ACIAIAA+AD4AIAAvAHYAYQByAC8AdwB3AHcALwBoAHQAbQBsAC8AaQBuAGQAZQB4AC4AaAB0AG0AbAAKAHMAdQBkAG8AIABzAHkAcwB0AGUAbQBjAHQAbAAgAGUAbgBhAGIAbABlACAAaAB0AHQAcABkAAoAcwB1AGQAbwAgAHMAeQBzAHQAZQBtAGMAdABsACAAcwB0AGEAcgB0ACAAaAB0AHQAcABkAA=="
   tags = {
     "name" = "terraform"
   }
