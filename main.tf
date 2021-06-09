@@ -1,8 +1,10 @@
 # TODO:
 # Add internet gateway
+# Add route to subnet 0.0.0.0/0 to IGW
 # Assign public IP to EC2 instance
 # Install apache and create simple web page on EC2 instance
 
+# ! use depends_on to make sure things are built in order of reference to other resources
 
 # Specify the AWS CLI credentials to be used
 # Need to see if there is a way to leverage AWS Secrets Manager on this step.
@@ -15,6 +17,7 @@ provider "aws" {
 # Create a VPC for this project
 resource "aws_vpc" "terraform" {
     cidr_block = "172.16.0.0/16"
+
     tags = {
       "name" = "terraform"
     }
@@ -25,16 +28,71 @@ resource "aws_subnet" "webservers" {
     vpc_id = aws_vpc.terraform.id
     cidr_block = "172.16.24.0/24"
     availability_zone = "us-east-1a"
+
     tags = {
       "name" = "terraform"
     }
+
     depends_on = [
       aws_vpc.terraform
     ]
 }
 
-# Create a security group to secure access to only allowed ports
-# for web traffic and management from known remote IPs.
+# Add internet gateway in VPC
+resource "aws_internet_gateway" "terraformigw" {
+  vpc_id = aws_vpc.terraform.id
+
+  tags = {
+    "name" = "terraform"
+  }
+
+  depends_on = [
+    aws_vpc.terraform
+  ]
+}
+
+# Create route table in VPC
+# route requires all key value pairs, contrary to documentation examples
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table
+resource "aws_route_table" "terraformrtb" {
+  vpc_id = aws_vpc.terraform.id
+  route = [ {
+    carrier_gateway_id = ""
+    cidr_block = "0.0.0.0/0"
+    destination_prefix_list_id = ""
+    egress_only_gateway_id = ""
+    gateway_id = aws_internet_gateway.terraformigw.id
+    instance_id = ""
+    ipv6_cidr_block = ""
+    local_gateway_id = ""
+    nat_gateway_id = ""
+    network_interface_id = ""
+    transit_gateway_id = ""
+    vpc_endpoint_id = ""
+    vpc_peering_connection_id = ""
+  } ]
+
+  tags = {
+    "name" = "terraform"
+  }
+  depends_on = [
+    aws_vpc.terraform,
+    aws_internet_gateway.terraformigw
+  ]
+}
+
+# Associate the route table to the webservers subnet
+resource "aws_route_table_association" "webserverrtbassoc" {
+  subnet_id = aws_subnet.webservers.id
+  route_table_id = aws_route_table.terraformrtb.id
+
+  depends_on = [
+    aws_subnet.webservers,
+    aws_route_table.terraformrtb
+  ]
+}
+
+# Create a security group to secure access to only allowed ports for web traffic.
 
 resource "aws_security_group" "webserverSecurity" {
   name        = "webserverSecurity"
@@ -67,7 +125,7 @@ resource "aws_security_group" "webserverSecurity" {
   }
 
   tags = {
-    Name = "terraform"
+    name = "terraform"
   }
   depends_on = [
     aws_vpc.terraform
@@ -95,12 +153,14 @@ data "aws_ami" "ubuntu" {
 }
 
 # Create ec2 resource using the AMI previously discovered of type t2.micro
-# added depends_on to resolve build order contraints
 resource "aws_instance" "webserver" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t2.micro"
   security_groups = [aws_security_group.webserverSecurity.id]
   subnet_id = aws_subnet.webservers.id
+  tags = {
+    "name" = "terraform"
+  }
 
   depends_on = [
     aws_security_group.webserverSecurity,
