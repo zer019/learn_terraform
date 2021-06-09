@@ -1,7 +1,4 @@
 # TODO:
-# Add internet gateway
-# Add route to subnet 0.0.0.0/0 to IGW
-# Assign public IP to EC2 instance
 # Install apache and create simple web page on EC2 instance
 
 # ! use depends_on to make sure things are built in order of reference to other resources
@@ -133,7 +130,7 @@ resource "aws_security_group" "webserverSecurity" {
 }
 
 # Minimum requirement select an AMI and instance type
-# TF documentation on this resource https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance
+# documentation on this resource https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance
 # data "aws_ami" is declaring a var that contains information about the most recent AMI for ubuntu 20.04 Server, published by Canonical
 # this allows for dynamic allocation of the AMI id when creating the resource webserver, if this is desired.
 data "aws_ami" "ubuntu" {
@@ -165,5 +162,15 @@ resource "aws_instance" "webserver" {
   depends_on = [
     aws_security_group.webserverSecurity,
     aws_subnet.webservers
+  ]
+}
+
+# Attach public IP to instance
+resource "aws_eip" "webserverip" {
+  vpc = true
+  instance = aws_instance.webserver.id  
+  depends_on = [
+    aws_internet_gateway.terraformigw,
+    aws_instance.webserver
   ]
 }
