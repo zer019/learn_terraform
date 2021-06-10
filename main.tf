@@ -112,6 +112,13 @@ resource "aws_security_group" "webserverSecurity" {
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
+  ingress {
+    description      = "Allow 22"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = [var.my_ip]
+  }
 
   egress {
     from_port        = 0
@@ -159,9 +166,19 @@ resource "aws_instance" "webserver" {
   user_data = <<-EOF
                   #!/bin/bash
                   sudo su
-                  yum -y install httpd
-                  echo "<p> My Instance! </p>" >> /var/www/html/index.html
+                  sudo apt-get -y install apache2 openssl
+                  sudo rm /var/www/html/index.html
+                  touch /var/www/html/index.html
+                  echo '<p style="text-align: center;">Welcome to Terraform</p>' >> /var/www/html/index.html
+                  echo '<p style="text-align: left;">This has been a rapid learning experience, there were a few hiccups along the way, specifically around the implementation of <a title="Terraform AWS Route Tables" href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table" target="_blank"rel="noopener">route tables</a>.</p>' >> /var/www/html/index.html
+                  echo '<p style="text-align: left;">Source code for this little project can be found <a title="GitHub Source" href="https://github.com/zer019/learn_terraform" target="_blank" rel="noopener">here</a>.</p>' >> /var/www/html/index.html
                   sudo systemctl enable httpd
+                  sudo a2enmod ssl
+                  sudo a2enmod rewrite
+                  sudo sed -i '1s/^/ServerName terraform.null19.com \n /' /etc/apache2/apache2.conf
+                  sudo snap install core
+                  sudo snap refresh core
+                  sudo snap install --classic certbot
                   sudo systemctl start httpd
                   EOF
   tags = {
