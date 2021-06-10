@@ -1,3 +1,9 @@
+# 
+# Main.tf uses the module method of organizing and instantiating infrastructure.
+# To assist in the organization and compartmentalization of the IaC related resources
+# are grouped in folders (modules) and called from main.tf.
+# 
+
 # TODO:
 # See about using S3 sync to create/replace the index.html file as proof of concept
 # Automate DNS record creation
@@ -13,10 +19,12 @@ provider "aws" {
   shared_credentials_file = "C:\\Users\\Admin\\.aws\\credentials"
   profile                 = "Personal-us-east-1"
 }
+
 # Use module VPC to build infra that other services will be dependent on
 module "vpc" {
   source = ".\\vpc"  
 }
+
 # Module EC2 is dependent on module VPC, this may not need to be explicitly defined
 # but there's likely no harm in doing so.
 # Security Group ID and Subnet ID are passed from the VPC Module
