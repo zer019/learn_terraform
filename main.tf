@@ -1,5 +1,7 @@
 # TODO:
 # See about using S3 sync to create/replace the index.html file as proof of concept
+# Automate DNS record creation
+# Automate Let's encrypt cert acquisition
 
 # ! use depends_on to make sure things are built in order of reference to other resources
 
