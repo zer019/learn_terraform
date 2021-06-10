@@ -1,4 +1,5 @@
 # TODO:
+# See about using S3 sync to create/replace the index.html file as proof of concept
 
 # ! use depends_on to make sure things are built in order of reference to other resources
 
@@ -56,6 +57,7 @@ resource "aws_internet_gateway" "terraformigw" {
 # route requires all key value pairs, contrary to documentation examples
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table
 # reference to VPC and Internet Gateway, use depends_on to force proper order
+# primary purpose of this RTB is to enable public IP access on the webserver
 resource "aws_route_table" "terraformrtb" {
   vpc_id = aws_vpc.terraform.id
   route = [ {
@@ -167,6 +169,7 @@ data "aws_ami" "ubuntu" {
 # Create ec2 resource using the AMI previously discovered of type t2.micro
 # Assign a public IP
 # Use the user_data to make some configuration changes on the instance and present the website.
+# Better way to do index.html would be s3 sync? Definitely for a larger website.
 resource "aws_instance" "webserver" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t2.micro"
