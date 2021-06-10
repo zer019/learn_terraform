@@ -29,4 +29,4 @@ override.tf.json
 # example: *tfplan
 
 # Keep variables file local
-# variables.tf
+variables.tf
