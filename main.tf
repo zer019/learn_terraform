@@ -156,7 +156,14 @@ resource "aws_instance" "webserver" {
   security_groups = [aws_security_group.webserverSecurity.id]
   subnet_id = aws_subnet.webservers.id
   key_name = "N. Virginia"
-  user_data_base64 = "IwAhAC8AYgBpAG4ALwBiAGEAcwBoAAoAcwB1AGQAbwAgAHMAdQAKAHkAdQBtACAALQB5ACAAaQBuAHMAdABhAGwAbAAgAGgAdAB0AHAAZAAKAGUAYwBoAG8AIAAiADwAcAA+ACAATQB5ACAASQBuAHMAdABhAG4AYwBlACEAIAA8AC8AcAA+ACIAIAA+AD4AIAAvAHYAYQByAC8AdwB3AHcALwBoAHQAbQBsAC8AaQBuAGQAZQB4AC4AaAB0AG0AbAAKAHMAdQBkAG8AIABzAHkAcwB0AGUAbQBjAHQAbAAgAGUAbgBhAGIAbABlACAAaAB0AHQAcABkAAoAcwB1AGQAbwAgAHMAeQBzAHQAZQBtAGMAdABsACAAcwB0AGEAcgB0ACAAaAB0AHQAcABkAA=="
+  user_data = <<-EOF
+                  #!/bin/bash
+                  sudo su
+                  yum -y install httpd
+                  echo "<p> My Instance! </p>" >> /var/www/html/index.html
+                  sudo systemctl enable httpd
+                  sudo systemctl start httpd
+                  EOF
   tags = {
     "name" = "terraform"
   }
