@@ -1,10 +1,10 @@
 # TODO:
-# Install apache and create simple web page on EC2 instance
 
 # ! use depends_on to make sure things are built in order of reference to other resources
 
 # Specify the AWS CLI credentials to be used
 # Need to see if there is a way to leverage AWS Secrets Manager on this step.
+# Of course there is https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/secretsmanager_secret
 provider "aws" {
   region                  = "us-east-1"
   shared_credentials_file = "C:\\Users\\Admin\\.aws\\credentials"
@@ -117,7 +117,7 @@ resource "aws_security_group" "webserverSecurity" {
     from_port        = 22
     to_port          = 22
     protocol         = "tcp"
-    cidr_blocks      = [var.my_ip]
+    cidr_blocks      = [var.my_ip] #reference my ip to restrict access
   }
 
   egress {
@@ -178,6 +178,9 @@ resource "aws_instance" "webserver" {
   ]
 }
 
+# Output the web server IP to accelerate connecting to check services and updating the DNS record
+# Looks like it may be possible to user google provider to do the DNS record maintenance but that
+# is outside the scope of this project, for now.
 output "Public_ips" {
   value = aws_instance.webserver.public_ip
 }
