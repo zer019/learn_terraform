@@ -2,6 +2,7 @@
 # See about using S3 sync to create/replace the index.html file as proof of concept
 # Automate DNS record creation
 # Automate Let's encrypt cert acquisition
+# Break this down into modules https://aws.amazon.com/blogs/apn/terraform-beyond-the-basics-with-aws/
 
 # ! use depends_on to make sure things are built in order of reference to other resources
 
