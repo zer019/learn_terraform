@@ -1,3 +1,9 @@
+# 
+# This module contains the basic structures necessary to instantiate the minimum infrastructure
+# needed to deploy an EC2 and make it publically accessible.
+# Security Groups were included here, but could be separated to their own module as complexity
+# increases.
+# 
 # Create a VPC for this project
 resource "aws_vpc" "terraform" {
     cidr_block = "172.16.0.0/16"

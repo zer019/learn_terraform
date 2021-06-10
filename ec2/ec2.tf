@@ -1,3 +1,8 @@
+# 
+# This module contains resources relevant to the instantiation of of compute resources
+# and relies on some information from the VPC module.
+# 
+
 # Minimum requirement select an AMI and instance type
 # documentation on this resource https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance
 # data "aws_ami" is declaring a var that contains information about the most recent AMI for ubuntu 20.04 Server, published by Canonical
@@ -23,7 +28,7 @@ data "aws_ami" "ubuntu" {
 # Use the user_data to make some configuration changes on the instance and present the website.
 # Better way to do index.html would be s3 sync? Definitely for a larger website.
 resource "aws_instance" "webserver" {
-  ami             = data.aws_ami.ubuntu.id
+  ami             = "ami-01de8ddb33de7a3d3" #changed to a static AMI as this is causing a re-build no matter what was changed in the plan
   instance_type   = "t2.micro"
   security_groups = ["${var.tf_sg_id}"]
   subnet_id       = "${var.tf_subnet_id}"
