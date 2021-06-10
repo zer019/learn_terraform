@@ -21,6 +21,8 @@ resource "aws_vpc" "terraform" {
 }
 
 # Create a subnet for our server(s)
+# reference to the terraform VPC
+# must be created after the VPC, use depends_on to force proper order
 resource "aws_subnet" "webservers" {
     vpc_id = aws_vpc.terraform.id
     cidr_block = "172.16.24.0/24"
@@ -36,8 +38,10 @@ resource "aws_subnet" "webservers" {
 }
 
 # Add internet gateway in VPC
+# reference to the terraform VPC
+# must be created after the VPC, use depends_on to force proper order
 resource "aws_internet_gateway" "terraformigw" {
-  vpc_id = aws_vpc.terraform.id
+  vpc_id = aws_vpc.terraform.id 
 
   tags = {
     "name" = "terraform"
@@ -51,6 +55,7 @@ resource "aws_internet_gateway" "terraformigw" {
 # Create route table in VPC
 # route requires all key value pairs, contrary to documentation examples
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table
+# reference to VPC and Internet Gateway, use depends_on to force proper order
 resource "aws_route_table" "terraformrtb" {
   vpc_id = aws_vpc.terraform.id
   route = [ {
@@ -79,6 +84,8 @@ resource "aws_route_table" "terraformrtb" {
 }
 
 # Associate the route table to the webservers subnet
+# reference to subnet and route table
+# use depends_on to ensure proper order
 resource "aws_route_table_association" "webserverrtbassoc" {
   subnet_id = aws_subnet.webservers.id
   route_table_id = aws_route_table.terraformrtb.id
@@ -90,6 +97,7 @@ resource "aws_route_table_association" "webserverrtbassoc" {
 }
 
 # Create a security group to secure access to only allowed ports for web traffic.
+# User Variables.tf to insert private IP to restrict management of the web server
 
 resource "aws_security_group" "webserverSecurity" {
   name        = "webserverSecurity"
@@ -159,7 +167,6 @@ data "aws_ami" "ubuntu" {
 # Create ec2 resource using the AMI previously discovered of type t2.micro
 # Assign a public IP
 # Use the user_data to make some configuration changes on the instance and present the website.
-# 
 resource "aws_instance" "webserver" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t2.micro"
