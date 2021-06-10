@@ -19,6 +19,7 @@ module "vpc" {
 }
 # Module EC2 is dependent on module VPC, this may not need to be explicitly defined
 # but there's likely no harm in doing so.
+# Security Group ID and Subnet ID are passed from the VPC Module
 module "ec2" {
   source = ".\\ec2"
   tf_sg_id = "${module.vpc.tf_sg_id}"

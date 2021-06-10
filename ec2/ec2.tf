@@ -34,3 +34,10 @@ resource "aws_instance" "webserver" {
     "name" = "terraform"
   }
 }
+
+# Output the web server IP to accelerate connecting to check services and updating the DNS record
+# Looks like it may be possible to user google provider to do the DNS record maintenance but that
+# is outside the scope of this project, for now.
+output "Public_ips" {
+  value = aws_instance.webserver.public_ip
+}
