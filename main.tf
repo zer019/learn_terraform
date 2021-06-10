@@ -157,30 +157,17 @@ data "aws_ami" "ubuntu" {
 }
 
 # Create ec2 resource using the AMI previously discovered of type t2.micro
+# Assign a public IP
+# Use the user_data to make some configuration changes on the instance and present the website.
+# 
 resource "aws_instance" "webserver" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t2.micro"
   security_groups = [aws_security_group.webserverSecurity.id]
   subnet_id = aws_subnet.webservers.id
   key_name = "N. Virginia"
-  user_data = <<-EOF
-                  #!/bin/bash
-                  sudo su
-                  sudo apt-get -y install apache2 openssl
-                  sudo rm /var/www/html/index.html
-                  touch /var/www/html/index.html
-                  echo '<p style="text-align: center;">Welcome to Terraform</p>' >> /var/www/html/index.html
-                  echo '<p style="text-align: left;">This has been a rapid learning experience, there were a few hiccups along the way, specifically around the implementation of <a title="Terraform AWS Route Tables" href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table" target="_blank"rel="noopener">route tables</a>.</p>' >> /var/www/html/index.html
-                  echo '<p style="text-align: left;">Source code for this little project can be found <a title="GitHub Source" href="https://github.com/zer019/learn_terraform" target="_blank" rel="noopener">here</a>.</p>' >> /var/www/html/index.html
-                  sudo systemctl enable httpd
-                  sudo a2enmod ssl
-                  sudo a2enmod rewrite
-                  sudo sed -i '1s/^/ServerName terraform.null19.com \n /' /etc/apache2/apache2.conf
-                  sudo snap install core
-                  sudo snap refresh core
-                  sudo snap install --classic certbot
-                  sudo systemctl start httpd
-                  EOF
+  associate_public_ip_address = true
+  user_data = "${file("webserver_setup.sh")}"
   tags = {
     "name" = "terraform"
   }
@@ -191,12 +178,6 @@ resource "aws_instance" "webserver" {
   ]
 }
 
-# Attach public IP to instance
-resource "aws_eip" "webserverip" {
-  vpc = true
-  instance = aws_instance.webserver.id  
-  depends_on = [
-    aws_internet_gateway.terraformigw,
-    aws_instance.webserver
-  ]
+output "Public_ips" {
+  value = aws_instance.webserver.public_ip
 }
