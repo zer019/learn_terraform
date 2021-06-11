@@ -35,6 +35,13 @@ resource "aws_instance" "webserver" {
   key_name        = "N. Virginia"
   associate_public_ip_address = true
   user_data = "${file(".\\ec2\\webserver_setup.sh")}"
+  lifecycle {
+    ignore_changes = [
+      ami,
+      tags,
+      security_groups
+    ]
+  }
   tags = {
     "name" = "terraform"
   }

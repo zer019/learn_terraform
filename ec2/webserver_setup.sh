@@ -15,4 +15,6 @@ sudo sed -i '1s/^/ServerName terraform.null19.com \n /' /etc/apache2/apache2.con
 sudo snap install core
 sudo snap refresh core
 sudo snap install --classic certbot
+sleep 1m
+sudo certbot --apache -d terraform.null19.com -n --agree-tos -m ian.j.williams@gmail.com
 sudo systemctl start apache2

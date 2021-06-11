@@ -40,3 +40,7 @@ module "ec2" {
     module.vpc
   ]
 }
+
+output "WebServerIP" {
+  value = "${module.ec2.Public_ips}"
+}
